@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <title></title>
+  </head>
+  <body>
+    <style>
+      .display-4{
+        text-align: center;}
+      .lead{
+        text-align: center;}
+      #principal{
+        text-align: center;}
+      #creacion{
+        text-align: center;}
+      #crear{
+        border-radius: 10px;
+        border-color: black;
+        border-width: 1px;}
+      #eliminar{
+        border-radius: 10px;
+        border-color: black;
+        border-width: 1px;}#stop{}
+
+    </style>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.js"></script>
+    <div class="jumbotron">
+  <h1 class="display-4">Sound-When</h1>
+  <p class="lead">Un sistema de alarmas para que te despiertes a la hora</p>
+</div>
+  <div id='principal'>
+    <input type='time' id='time' data='input'>
+    <button id='crear'>Crear</button>
+</div>
+    <div id='creacion'>
+</div>
+    <audio src="alarma_2.mp3" type='audio/mp3' id='sonando'></audio>
+    <script type="text/javascript">
+      var alarmas=[];
+      var checked=true;
+      if(localStorage.getItem('alarmas')){
+      alarmas=JSON.parse(localStorage.getItem('alarmas'))
+    }
+          console.log(alarmas);
+      alarmas.forEach(function(alarma){
+      var input=$('input#time').val();
+      var append1="<br><div class='creado' id='" + alarma.id + "'><input id='seleccionado' type='checkbox' checked><h3 id='alarma' type='time'>"+alarma.hora+"</h3><button id='eliminar'>Eliminar</button><br><br><button id='stop'>Stop</button><br></div>";
+      $('div#creacion').append(append1)
+    })
+      $('button#crear').click(function(event){
+        var input=$('input#time').val();
+        var append="<br><div class='creado' id='" + (alarmas.length + 1) + "'><input id='seleccionado' type='checkbox' checked><h3 id='alarma'>"+input+"</h3><button id='eliminar'>Eliminar</button><br><br><button id='stop'>Stop</button><br></div>";
+        $('div#creacion').append(append)
+          alarmas.push({hora:input,
+                    activo:true,
+                    sonado:false,
+                    id:alarmas.length + 1})
+        localStorage.setItem('alarmas', JSON.stringify(alarmas))
+            console.log(alarmas)
+    });
+  //eliminar alarma
+    $(document).on('click','button#eliminar',function(event){
+        var id=parseInt($(event.currentTarget).parent().attr('id'));
+        $(event.currentTarget).parent().remove()
+            console.log(alarmas);
+            for(var x=0;x<alarmas.length;x++){
+              console.log(id,alarmas[x].id);
+                if(id===alarmas[x].id){
+                alarmas.splice(x,1)
+                localStorage.removeItem('alarmas',alarmas[x]);
+        }
+      }
+            console.log(alarmas)
+  })
+  //desseleccionar alarma
+    $(document).on('click','#seleccionado',function(event){
+        var id=parseInt($(event.currentTarget).parent().attr('id'));
+          for(var x=0;x<alarmas.length;x++){
+          if(id===alarmas[x].id){
+            alarmas[x].activo=false;
+            console.log(alarmas)
+        }else if(alarmas[x].activo===false && alarmas[x].sonado===false){
+          alarmas[x].activo=true;
+        }
+      }
+  })
+  //pausar alarmas
+  $(document).on('click','#stop',function(event){
+      var id=parseInt($(event.currentTarget).parent().attr('id'));
+        for(var x=0;x<alarmas.length;x++){
+          if(id===alarmas[x].id){
+          $('#sonando')[0].pause()
+          alarmas[x].sonado=true;
+          console.log(alarmas)
+        }
+      }
+  })
+    setInterval(function(){
+      var input=$('input#time').val();
+      var fechaActual = new Date();
+      for(var x=0;x<alarmas.length;x++){
+        if(input===fechaActual.getHours() + ':' + fechaActual.getMinutes() && alarmas[x].activo===true && alarmas[x].sonado===false){
+        $('#sonando')[0].play()
+        console.log('alarmasonando')
+        }
+      }
+        console.log(alarmas)
+},10000)
+</script>
+  </body>
+</html>
